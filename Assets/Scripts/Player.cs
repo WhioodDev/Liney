@@ -9,7 +9,6 @@ using UnityEngine.Serialization;
 public class Player : MonoBehaviour
 {
     [Header("Settings")]
-    [SerializeField] private float tickTime;
     [SerializeField] private int maxTailSize;
     [SerializeField] private float whiteAmountToLose;
     
@@ -24,12 +23,12 @@ public class Player : MonoBehaviour
     private SpriteRenderer _spriteRenderer;
     private Vector2 _queuedDirection;
     private Vector2 _lastStartPosition;
-    private float _tickTimer;
     private bool _canMove = false;
 
     private void Awake()
     {
         MapManager.OnMapChange += OnMapChange;
+        GameManager.OnTick += MovementTick;
     }
 
     private void Start()
@@ -44,6 +43,7 @@ public class Player : MonoBehaviour
     private void OnDisable()
     {
         MapManager.OnMapChange -= OnMapChange;
+        GameManager.OnTick -= MovementTick;
     }
 
     public void OnMovement(InputAction.CallbackContext context)
@@ -54,10 +54,7 @@ public class Player : MonoBehaviour
     private void Update()
     {
         if (!_canMove) return;
-        _tickTimer += Time.deltaTime;
         UpdateCurrentDirection();
-        if (_tickTimer >= tickTime)
-            MovementTick();
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -69,10 +66,11 @@ public class Player : MonoBehaviour
 
         if (other.gameObject.TryGetComponent<IFinish>(out IFinish finish))
         {
+            gameManager.Finish();
         }
     }
     
-    private void OnMapChange(Vector2 startPos)
+    private void OnMapChange(Vector2 startPos, float tickSpeed)
     {
         _lastStartPosition = startPos;
         transform.position = _lastStartPosition;
@@ -108,8 +106,6 @@ public class Player : MonoBehaviour
 
     private void MovementTick()
     {
-        _tickTimer = 0;
-
         // apply queued input once per tick
         _currentDirection = _queuedDirection;
 

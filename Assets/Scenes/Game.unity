@@ -196,9 +196,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7c27c0467f53954ba2b171a2d71a506, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapManager
-  playerStartPosition: {x: 0, y: 0}
   levels:
   - {fileID: 11400000, guid: 948ee012a58a85043b4e0ad6193bf256, type: 2}
+  blocks:
+  - {fileID: 11400000, guid: 8113e8fb58316f24a8203b52ee25fe95, type: 2}
+  - {fileID: 11400000, guid: 5ec34cc34c7b2114dad1884815a77951, type: 2}
+  - {fileID: 11400000, guid: 9778aeb669107924d8c7fb2061538289, type: 2}
   gameManager: {fileID: 939494557}
 --- !u!1 &519420028
 GameObject:
@@ -281,7 +284,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.18867922, g: 0.18867922, b: 0.18867922, a: 0}
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -465,9 +468,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6eef441db4356f3418dc98ea6b287c0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  tileSizeWidth: 0
-  tileSizeHeight: 0
-  mapManager: {fileID: 254742371}
 --- !u!1 &1375950613
 GameObject:
   m_ObjectHideFlags: 0
@@ -532,11 +532,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8d7f06f9b3dcdf45b41d88d8451e2cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PLayer
-  tickTime: 0.2
   maxTailSize: 5
+  whiteAmountToLose: 0.05
   tailParent: {fileID: 1375950614}
   gameManager: {fileID: 939494557}
-  whiteAmountToLose: 0.05
 --- !u!114 &1386560491
 MonoBehaviour:
   m_ObjectHideFlags: 0

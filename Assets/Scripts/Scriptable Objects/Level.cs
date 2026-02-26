@@ -10,6 +10,8 @@ public class Level : ScriptableObject
     // Flattened: index = x + y * width
     [SerializeField] private List<int> cells = new();
 
+    public float tickTimer;
+
     public int Get(int x, int y)
     {
         if (!InBounds(x, y)) return 0;

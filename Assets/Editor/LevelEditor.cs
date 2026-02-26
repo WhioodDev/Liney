@@ -20,6 +20,10 @@ public class LevelEditor : Editor
         level.height = EditorGUILayout.IntField("Height", level.height);
         level.width = Mathf.Max(1, level.width);
         level.height = Mathf.Max(1, level.height);
+        
+        // Tick time
+        EditorGUILayout.Space(6);
+        level.tickTimer = EditorGUILayout.FloatField("Tick Timer", level.tickTimer);
 
         // Simple paint controls
         EditorGUILayout.Space(6);
