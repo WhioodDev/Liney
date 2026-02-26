@@ -5,32 +5,50 @@ using UnityEngine;
 
 public class MapManager : MonoBehaviour
 {
-    public Vector2 playerStartPosition;
-    public static event Action<Vector2> onMapChange;
-    private Vector2 _tileSize;
+    public static event Action<Vector2> OnMapChange;
 
     [SerializeField] private List<Level> levels;
-    
     [SerializeField] private GameManager gameManager;
     
+    private Vector2 _playerStartPosition;
     private GameObject _squarePrefab;
-    private int _currentLevel = 0;
-
+    private int _currentLevel;
+    private Vector2 _tileSize;
     private int[,] _map;
+
+    private void Awake()
+    {
+        GameManager.OnTileSizeChange += GenerateMap;
+    }
 
     private void Start()
     {
+        // Initialize square prefab
         _squarePrefab = Resources.Load<GameObject>("Square");
 
-        _tileSize = new Vector2(gameManager.tileSizeWidth, gameManager.tileSizeHeight);
-
-        _map = levels[_currentLevel].To2DArray();
-        
         GenerateMap();
+    }
+
+    private void OnDisable()
+    {
+        GameManager.OnTileSizeChange -= GenerateMap;
+    }
+
+    private void DeleteAllBlocks()
+    {
+        for(int i = transform.childCount - 1; i >= 0; i--)
+        {
+            Destroy(transform.GetChild(i).gameObject);
+        }
     }
 
     private void GenerateMap()
     {
+        // Calculate the tile size
+        _tileSize = gameManager.GetTileSize();
+        
+        DeleteAllBlocks();
+        _map = levels[_currentLevel].To2DArray();
         for (int y = 0; y < _map.GetLength(0); y++)
         {
             for (int x = 0; x < _map.GetLength(1); x++)
@@ -43,10 +61,7 @@ public class MapManager : MonoBehaviour
                         PlaceWall(x, y);
                         break;
                     case 2:
-                        int flippedY = _map.GetLength(0) - 1 - y;
-                        playerStartPosition = new Vector3(_tileSize.x * x, _tileSize.y * flippedY, 0);
-                        playerStartPosition.y -= Camera.main.orthographicSize - _tileSize.y / 2;
-                        playerStartPosition.x -= (Camera.main.orthographicSize * Camera.main.aspect) - _tileSize.x / 2;
+                        SetPlayerStartPosition(x, y);
                         break;
                     case 3:
                         PlaceFinish(x, y);
@@ -54,7 +69,15 @@ public class MapManager : MonoBehaviour
                 }
             }
         }
-        onMapChange?.Invoke(playerStartPosition);
+        OnMapChange?.Invoke(_playerStartPosition);
+    }
+
+    private void SetPlayerStartPosition(int x, int y)
+    {
+        int flippedY = _map.GetLength(0) - 1 - y;
+        _playerStartPosition = new Vector3(_tileSize.x * x, _tileSize.y * flippedY, 0);
+        _playerStartPosition.y -= Camera.main.orthographicSize - _tileSize.y / 2;
+        _playerStartPosition.x -= (Camera.main.orthographicSize * Camera.main.aspect) - _tileSize.x / 2;
     }
 
     private void PlaceFinish(int x, int y)

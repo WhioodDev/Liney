@@ -1,24 +1,34 @@
+using System;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public float tileSizeWidth;
-    public float tileSizeHeight;
+    public static event Action OnTileSizeChange;
+    
+    private Vector2 _currentTileSize;
 
-    [SerializeField] private MapManager mapManager;
-
-    private void Awake()
+    private void Start()
     {
-        if (Camera.main == null) return;
+        _currentTileSize = GetTileSize();
+    }
 
+    public Vector2 GetTileSize()
+    {
         Camera cam = Camera.main;
+        return new Vector2(cam.orthographicSize * 2f * cam.aspect / 32, cam.orthographicSize * 2f / 18);
+    }
 
-        // World size of camera
-        float worldHeight = cam.orthographicSize * 2f;
-        float worldWidth = worldHeight * cam.aspect;
+    private void Update()
+    {
+        if (_currentTileSize != GetTileSize())
+        {
+            _currentTileSize = GetTileSize();
+            OnTileSizeChange?.Invoke();
+        }
+    }
 
-        // Divide by grid size
-        tileSizeWidth = worldWidth / 32;
-        tileSizeHeight = worldHeight / 18;
+    public void Finish()
+    {
+        
     }
 }

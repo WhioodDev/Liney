@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -7,24 +8,28 @@ using UnityEngine.Serialization;
 
 public class Player : MonoBehaviour
 {
+    [Header("Settings")]
     [SerializeField] private float tickTime;
     [SerializeField] private int maxTailSize;
+    [SerializeField] private float whiteAmountToLose;
+    
+    [Space(5), Header("References")]
     [SerializeField] private Transform tailParent;
     [SerializeField] private GameManager gameManager;
-    [SerializeField] private float whiteAmountToLose;
-    private float _tickTimer;
+    
+    private GameObject _squarePrefab;
     private Vector2 _movementVector;
     private Vector2 _currentDirection;
     private List<GameObject> _tailBlocks;
-    private GameObject _squarePrefab;
     private SpriteRenderer _spriteRenderer;
     private Vector2 _queuedDirection;
     private Vector2 _lastStartPosition;
+    private float _tickTimer;
     private bool _canMove = false;
 
     private void Awake()
     {
-        MapManager.onMapChange += OnMapChange;
+        MapManager.OnMapChange += OnMapChange;
     }
 
     private void Start()
@@ -33,26 +38,19 @@ public class Player : MonoBehaviour
         _squarePrefab = Resources.Load<GameObject>("Square");
         _spriteRenderer = GetComponent<SpriteRenderer>();
         _queuedDirection = _currentDirection;
-        transform.localScale = new Vector3(gameManager.tileSizeWidth, gameManager.tileSizeHeight);
+        transform.localScale = gameManager.GetTileSize();
     }
 
     private void OnDisable()
     {
-        MapManager.onMapChange -= OnMapChange;
+        MapManager.OnMapChange -= OnMapChange;
     }
 
     public void OnMovement(InputAction.CallbackContext context)
     {
         _movementVector = context.ReadValue<Vector2>();
     }
-
-    private void OnMapChange(Vector2 startPos)
-    {
-        _lastStartPosition = startPos;
-        transform.position = _lastStartPosition;
-        _canMove = true;
-    }
-
+    
     private void Update()
     {
         if (!_canMove) return;
@@ -60,6 +58,27 @@ public class Player : MonoBehaviour
         UpdateCurrentDirection();
         if (_tickTimer >= tickTime)
             MovementTick();
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject.TryGetComponent<IDeadly>(out IDeadly deadly))
+        {
+            ResetPlayer();
+        }
+
+        if (other.gameObject.TryGetComponent<IFinish>(out IFinish finish))
+        {
+        }
+    }
+    
+    private void OnMapChange(Vector2 startPos)
+    {
+        _lastStartPosition = startPos;
+        transform.position = _lastStartPosition;
+        _canMove = true;
+        transform.localScale = gameManager.GetTileSize();
+        ResetPlayer();
     }
 
     private bool IsOpposite(Vector2 a, Vector2 b)
@@ -117,6 +136,7 @@ public class Player : MonoBehaviour
 
     private void DeleteLongTail(bool removeAll)
     {
+        if (_tailBlocks == null) return;
         if (removeAll)
         {
             for(int i = tailParent.transform.childCount - 1; i >= 0; i--)
@@ -143,13 +163,7 @@ public class Player : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.gameObject.TryGetComponent<IDeadly>(out IDeadly deadly))
-        {
-            ResetPlayer();
-        }
-    }
+
 
     private void ResetPlayer()
     {
